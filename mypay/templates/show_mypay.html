@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
 <title>MyPay</title>
 {% endblock meta %}
@@ -15,7 +16,7 @@
                 </div>
             </div>
             <div class="d-flex mb-3" style="max-width: 50%; justify-content: flex-start;">
-                <div class="p-2 border rounded w-100 text-left">Saldo: Rp{{ user.mypay_balance }}</div>
+                <div class="p-2 border rounded w-100 text-left">Saldo: Rp{{ user.mypay_balance|intcomma }}</div>
             </div>
         </div>
     </div>
@@ -34,7 +35,11 @@
                     <tbody>
                         {% for transaksi in riwayat %}
                         <tr>
-                            <td>{{ transaksi.nominal }}</td>
+                            {% if transaksi.nama == 'Transfer' or transaksi.nama == 'Pembelian Voucher' or transaksi.nama == 'Penarikan Dana' or transaksi.nama == 'Pembayaran Jasa' %}
+                                <td>- Rp{{transaksi.nominal|intcomma }}</td>
+                            {% else %}
+                                <td>+ Rp{{transaksi.nominal|intcomma }}</td>
+                            {% endif %}
                             <td>{{ transaksi.tanggal }}</td>
                             <td>{{ transaksi.nama }}</td>
                         </tr>   

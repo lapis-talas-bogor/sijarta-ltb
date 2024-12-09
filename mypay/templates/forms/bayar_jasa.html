@@ -1,4 +1,4 @@
-<form action="/mypay/bayar_jasa/" method="post">
+<form action="/mypay/bayar_jasa/" method="post" id="form-bayar-jasa">
     {% csrf_token %}    
     <div class="mb-3 d-flex align-items-center">
         <div class="me-3">
@@ -11,6 +11,8 @@
                     <li>
                         <a class="dropdown-item" href="#" data-harga="{{ pesanan.total_biaya }}" data-id="{{ pesanan.id }}"> {{ pesanan.nama_subkategori }} </a>
                     </li>
+                    {% empty %}
+                        Kamu belum memiliki pesanan
                     {% endfor %}
                 </ul>
             </div>

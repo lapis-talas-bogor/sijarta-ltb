@@ -35,20 +35,17 @@ class OrderService:
     
     @staticmethod
     def check_discount_code(discount_code, user_id):
-        #WHERE P.tgl_akhir_berlaku >= CURRENT_DATE
         sql_promo = """
         SELECT 
             D.kode, 
             D.potongan, 
-            D.min_tr_pemesanan, 
+            D.min_tr_pemesanan,
             'PROMO' AS tipe_diskon
         FROM SIJARTA.DISKON D
         JOIN SIJARTA.PROMO P ON D.kode = P.kode
-        WHERE D.kode = %s;
+        WHERE D.kode = %s
         """
-        
-        #AND CURRENT_DATE BETWEEN TPV.tgl_awal AND TPV.tgl_akhir
-        #AND V.kuota_penggunaan > TPV.telah_digunakan
+
         sql_voucher = """
         SELECT 
             D.kode, 
@@ -103,7 +100,8 @@ class OrderService:
         
         if result:
             return result['nama']
-        
+    
+    @staticmethod
     def get_status_id_by_name(status_name):
         sql = """
         SELECT id 
@@ -117,6 +115,7 @@ class OrderService:
             return result['id']
         return None
     
+    @staticmethod
     def add_order_status(order_id, status_id, tgl_waktu) :
         sql = """
         INSERT INTO SIJARTA.TR_PEMESANAN_STATUS (id_tr_pemesanan, id_status, tgl_waktu)
@@ -126,6 +125,7 @@ class OrderService:
 
         execute_query(sql, values)
 
+    @staticmethod
     def delete_order(id_pemesanan):
         sql_delete_status = """
         DELETE FROM SIJARTA.TR_PEMESANAN_STATUS
@@ -138,3 +138,32 @@ class OrderService:
         WHERE id = %s;
         """
         execute_query(sql_delete_jasa, [id_pemesanan])
+    
+    @staticmethod
+    def mark_voucher_as_used(kode_voucher, id_pelanggan):
+        sql = """
+        UPDATE SIJARTA.TR_PEMBELIAN_VOUCHER
+        SET telah_digunakan = telah_digunakan + 1
+        WHERE id_voucher = %s
+        AND id_pelanggan = %s;
+        """
+        execute_query(sql, [kode_voucher, id_pelanggan])
+    
+    def check_promo_again(kode_voucher):
+        sql_promo = """
+        SELECT 
+            D.kode, 
+            D.potongan, 
+            D.min_tr_pemesanan,
+            'PROMO' AS tipe_diskon
+        FROM SIJARTA.DISKON D
+        JOIN SIJARTA.PROMO P ON D.kode = P.kode
+        WHERE D.kode = %s
+        AND P.tgl_akhir_berlaku >= CURRENT_DATE
+        """
+
+        promo_result = fetch_dict_one(sql_promo, [kode_voucher])
+        if promo_result:
+            return promo_result 
+        
+        return None

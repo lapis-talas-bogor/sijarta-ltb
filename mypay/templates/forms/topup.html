@@ -1,7 +1,7 @@
-<form action="/mypay/topup/" method="post" id="topupform">
+<form action="/mypay/topup/" method="post" id="form-topup">
     {% csrf_token %}
     <div class="mb-3">
-        <input type="number" required name="nominal" min="0" class="form-control" id="formGroupExampleInput" placeholder="Masukan jumlah nominal saldo">
+        <input type="number" required name="nominal" min="1" class="form-control" id="formGroupExampleInput" placeholder="Masukan jumlah nominal saldo">
     </div>
     <button type="submit" class="btn btn-success">Top up</button>
 </form>

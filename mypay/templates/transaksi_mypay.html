@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
     <title>Transaksi</title>
 {% endblock meta %}
@@ -13,7 +14,7 @@
                     <div class="p-2 border rounded">{% now "d-m-Y" %}</div>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">Saldo: Rp{{ user.mypay_balance }}</div>
+                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">Saldo: Rp{{ user.mypay_balance|intcomma }}</div>
                 </div>
                 <div class="dropdown mb-3">
                 </div>
@@ -45,42 +46,108 @@
                 <div class="tab-pane fade" id="pills-withdrawal" role="tabpanel" aria-labelledby="pills-withdrawal-tab">{% include 'forms/withdrawal.html' %}</div>
               </div>
         </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Warning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+            </div>
+        </div>
+        </div>
+        
     
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-        const dropdownBank = document.getElementById("kategori_transaksi");
+        // input validator, jika tidak sesuai akan memunculkan droppdown
+        async function handleFormSubmit(event, formSelector, endpoint) {
+        event.preventDefault();
+        const form = document.querySelector(formSelector);
+        const formData = new FormData(form);
+    
+        try {
+            const response = await fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            });
+    
+            const result = await response.json();
+    
+            if (!response.ok) {
+            document.getElementById('modalMessage').textContent = result.message || "Terjadi kesalahan.";
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+            } else {
+            window.location.href = result.redirect_url || '/mypay/transaksi';
+            }
+        } catch (error) {
+            document.getElementById('modalMessage').textContent = "Gagal memproses permintaan.";
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+        }
+        
+        // Handler untuk masing-masing form
+
+        const topupForm = document.querySelector('#form-topup');
+        if (topupForm) {
+            topupForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-topup', '/mypay/topup/'));
+        }
+    
+        const withdrawalForm = document.querySelector('#form-withdrawal');
+        if (withdrawalForm) {
+            withdrawalForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-withdrawal', '/mypay/withdrawal/'));
+        }
+    
+        const transferForm = document.querySelector('#form-transfer');
+        if (transferForm) {
+            transferForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-transfer', '/mypay/transfer/'));
+        }
+    
+        const bayarForm = document.querySelector('#form-bayar-jasa');
+        if (bayarForm) {
+            bayarForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-bayar-jasa', '/mypay/bayar_jasa/'));
+        }
+
+        // Blok kode di bawah ini berfungsi untuk mengubah nama dropdown bank secara dinamis pada withdrawal
+        const dropdown = document.getElementById("kategori_transaksi");
         const namaBankInput = document.getElementById("nama_bank");
         const bankOptions = document.querySelectorAll("#bank-options .dropdown-item");
-    
+
         bankOptions.forEach(option => {
             option.addEventListener("click", (e) => {
                 e.preventDefault(); 
                 const selectedBank = option.getAttribute("data-value"); 
-                dropdownBank.textContent = selectedBank; 
+                dropdown.textContent = selectedBank; 
                 namaBankInput.value = selectedBank; 
             });
         });
 
-        const pesananMenuItems = document.querySelectorAll('#pesanan_menu .dropdown-item');
-        const pesananDropdown = document.getElementById('pesanan_dropdown');
-        const hargaJasaDiv = document.getElementById('harga_jasa');
-        const inputNamaPesanan = document.getElementById('input_nama_pesanan');
-        const inputHargaPesanan = document.getElementById('input_harga_pesanan');
-        const inputIdPesanan = document.getElementById('input_id_pesanan');
+        const pesananMenu = document.getElementById("pesanan_menu");
+        const hargaJasa = document.getElementById("harga_jasa");
+        const inputIdPesanan = document.getElementById("input_id_pesanan");
+        const inputHargaPesanan = document.getElementById("input_harga_pesanan");
+        const pesananDropdown = document.getElementById("pesanan_dropdown");
 
-        pesananMenuItems.forEach(item => {
-            item.addEventListener('click', function (event) {
-                event.preventDefault(); 
-                const selectedPesanan = this.textContent.trim();
-                const harga = this.getAttribute('data-harga');
-                const id = this.getAttribute('data-id');
-                
-                pesananDropdown.textContent = selectedPesanan;
-                hargaJasaDiv.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(harga)}`;
+        pesananMenu.addEventListener('click', function(e) {
+            const selectedPesanan = e.target;
+            if (selectedPesanan.tagName === 'A') {
+                pesananDropdown.textContent = selectedPesanan.textContent;
+                const harga = selectedPesanan.getAttribute("data-harga");
+                hargaJasa.textContent = `Harga: Rp${harga}`;           
+                inputIdPesanan.value = selectedPesanan.getAttribute("data-id");
                 inputHargaPesanan.value = harga;
-                inputIdPesanan.value = id;
-            });
+            }
         });
     });
-    </script>
+    
+</script>
 {% endblock content %}

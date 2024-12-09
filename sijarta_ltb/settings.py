@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "pekerjajasa",
     "diskon",
     "services_and_booking",
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

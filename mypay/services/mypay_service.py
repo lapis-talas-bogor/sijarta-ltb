@@ -150,6 +150,7 @@ class MyPayService:
             JOIN sijarta.status_pesanan s ON(ps.id_status = s.id)
             JOIN sijarta.user u ON(pj.id_pelanggan = u.id)
             JOIN sijarta.subkategori_jasa sub ON(pj.id_kategori_jasa = sub.id)
+            JOIN sijarta.kategori_jasa kj ON(kj.id = sub.kategori_jasa_id)
         WHERE pj.id_pelanggan = %s AND s.status = %s;
         """
 

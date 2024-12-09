@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
 <title>MyPay</title>
 {% endblock meta %}
@@ -61,7 +62,7 @@
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp{{ pekerjaan.total_biaya }}</p>
+                <p class="d-flex" style="flex:0 0 80%">: Rp{{ pekerjaan.total_biaya|intcomma }}</p>
               </div>
               <input type="text" name="id" hidden value="{{ pekerjaan.id }}">
               {% if pekerjaan.status != "Pekerjaan Selesai" %}
@@ -90,7 +91,7 @@
             dropdownButton.textContent = statusName;
             status_select.value = statusId;
         });
-    });
+    }); 
     
 });
 </script>
