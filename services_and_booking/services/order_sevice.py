@@ -43,7 +43,7 @@ class OrderService:
             'PROMO' AS tipe_diskon
         FROM SIJARTA.DISKON D
         JOIN SIJARTA.PROMO P ON D.kode = P.kode
-        WHERE D.kode = %s
+        WHERE D.kode = %s;
         """
 
         sql_voucher = """
