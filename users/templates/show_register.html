@@ -65,4 +65,31 @@
             </div>
         </div>
     </section>
+    <!-- Bootstrap Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="errorToast"
+             class="toast align-items-center text-bg-danger border-0"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true"
+             {% if error_message %} data-bs-autohide="false" {% else %} style="display: none;" {% endif %}>
+            <div class="d-flex">
+                <div class="toast-body">{{ error_message }}</div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Automatically show the toast if there's an error message
+        document.addEventListener("DOMContentLoaded", function () {
+            var errorToast = document.getElementById('errorToast');
+            if (errorToast && errorToast.style.display !== "none") {
+                var toast = new bootstrap.Toast(errorToast);
+                toast.show();
+            }
+        });
+    </script>
 {% endblock %}
