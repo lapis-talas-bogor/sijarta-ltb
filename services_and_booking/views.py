@@ -2,10 +2,12 @@ from datetime import datetime
 from django.contrib import messages
 from uuid import UUID
 import uuid
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from services_and_booking.services.category_service import CategoryAndSubcategoryService
 from services_and_booking.services.order_sevice import OrderService
+from services_and_booking.services.testimoni_service import TestimoniService
+
 
 # Create your views here.
 def show_homepage(request):
@@ -132,9 +134,7 @@ def show_subkategori(request, subcategory_id):
     subcategory_name = subcategory_data['nama_subkategori']
     subcategory_description = subcategory_data['deskripsi']
 
-    workers = []
-    sessions = []
-    testimonies = []
+    testimonies = TestimoniService.get_all_testimoni(subcategory_id)
     workers = CategoryAndSubcategoryService.get_workers_by_category(category_id)
     sessions = CategoryAndSubcategoryService.get_sessions_by_subcategory(subcategory_id)
     payment_methods = OrderService.get_payment_method_details()
@@ -162,8 +162,7 @@ def show_subkategori(request, subcategory_id):
         'current_date' : current_date,
         'current_date_no_formatting' : current_date_no_formatting
     }
-
-
+    print(testimonies)
     return render(request, "subkategori.html", context)
 
 def join_category(request, subcategory_id):
@@ -182,9 +181,7 @@ def join_category(request, subcategory_id):
         subcategory_name = subcategory_data['nama_subkategori']
         subcategory_description = subcategory_data['deskripsi']
 
-        workers = []
-        sessions = []
-        testimonies = []
+        testimonies = TestimoniService.get_all_testimoni(subcategory_id)
         workers = CategoryAndSubcategoryService.get_workers_by_category(category_id)
         sessions = CategoryAndSubcategoryService.get_sessions_by_subcategory(subcategory_id)
 
@@ -223,28 +220,11 @@ def create_order(request):
         message = None
         if diskon:
             valid_diskon = OrderService.check_discount_code(diskon,pelanggan_id)
-            if not valid_diskon or float(valid_diskon['min_tr_pemesanan']) > session_price:
-                messages.error(request, "Kode diskon yang Anda masukkan tidak valid atau tidak memenuhi syarat minimal transaksi.")
+            if not valid_diskon:
+                message = "Kode diskon yang Anda masukkan tidak valid."
                 return redirect("service:show_subkategori", subcategory_id=subcategory_id)
             else:
-                if valid_diskon['tipe_diskon'] == "VOUCHER":
-                    try:
-                        OrderService.mark_voucher_as_used(valid_diskon['kode'], pelanggan_id)
-                    except:
-                        messages.error(request, "Voucher telah melewati batas jumlah penggunaan atau batasan hari berlaku.")
-                        return redirect("service:show_subkategori", subcategory_id=subcategory_id)
-                else:
-                    valid_promo = OrderService.check_promo_again(valid_diskon['kode'])
-                    if not valid_promo:
-                        messages.error(request, "Promo sudah melewati tanggal akhir berlaku")
-                        return redirect("service:show_subkategori", subcategory_id=subcategory_id)
-                    
-
                 session_price -= float(valid_diskon['potongan'])
-        
-        if metode_bayar == "Pilih Metode Pembayaran...":
-            messages.error(request, "Pilih metode pembayaran anda")
-            return redirect("service:show_subkategori", subcategory_id=subcategory_id)
         
         OrderService.create_order(order_id, 
                                 tanggal_pemesanan, 
@@ -263,8 +243,6 @@ def create_order(request):
         status_id = OrderService.get_status_id_by_name(status_name)
 
         tgl_waktu =  datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        print(status_id)
         OrderService.add_order_status(order_id,
                                       status_id,
                                       tgl_waktu
@@ -310,4 +288,26 @@ def cancel_booking(request):
         OrderService.delete_order(id_pemesanan)
         return redirect('service:show_booking_view')
 
+def create_testimoni(request):
+    if request.method == 'POST':
+        # Ambil data dari form
+        rating = request.POST.get('rating')
+        komentar = request.POST.get('komentar')
+        id_tr_pemesanan = request.POST.get('pesanan_id')  # ID pemesanan yang dikirim dari form
 
+        # Cek apakah testimoni sudah ada untuk pemesanan ini pada tanggal yang sama
+        result = TestimoniService.check_existing_testimoni(id_tr_pemesanan)
+
+        # Jika sudah ada, beri pesan error dan kembalikan ke halaman yang sesuai
+        if result:
+            messages.error(request, "Testimoni untuk pekerja sudah dibuat Anda hari ini!")
+            return redirect('service:show_booking_view')
+
+        # Jika belum ada, lanjutkan untuk membuat testimoni baru
+        TestimoniService.create_testimoni(id_tr_pemesanan, komentar, rating)
+        
+        return redirect('service:show_booking_view')
+
+def delete_testimoni(request, testimoni_id, id_subkategori):
+    TestimoniService.delete_testimoni(testimoni_id)
+    return redirect('service:show_subkategori', subcategory_id=id_subkategori)

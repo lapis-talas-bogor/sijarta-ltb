@@ -52,7 +52,6 @@
                         </td>
                         {% endif %}
                     </tr>
-
                     <div class="modal fade" id="pesanModal{{ session.sesi }}" tabindex="-1" aria-labelledby="pesanModalLabel{{ session.sesi }}" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
@@ -168,46 +167,91 @@
         <h4>Testimoni</h4>
         <br>
         <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="testimoni-card">
-                    <div class="testimoni-header">
-                        <h5>John Doe</h5>
-                        <small>18 November 2024</small>
+            {% if testimonies %}
+                {% for testimoni in testimonies %}
+                    <div class="col-md-4 mb-3">
+                        <div class="testimoni-card">
+                            <div class="testimoni-header">
+                                <h5>{{ testimoni.nama_pelanggan }}</h5>
+                                <small>{{ testimoni.tgl|date:"d F Y" }}</small>  <!-- Format tanggal sesuai kebutuhan -->
+                            </div>
+                            <div class="testimoni-body">
+                                <p>Nama Pekerja: <strong>{{ testimoni.nama_pekerja }}</strong></p>
+                                <p>Rating: 
+                                    <span class="rating">
+                                        {% if testimoni.rating == 1 %}
+                                            ⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 2 %}
+                                            ⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 3 %}
+                                            ⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 4 %}
+                                            ⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 5 %}
+                                            ⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 6 %}
+                                            ⭐⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 7 %}
+                                            ⭐⭐⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 8 %}
+                                            ⭐⭐⭐⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 9 %}
+                                            ⭐⭐⭐⭐⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                        {% if testimoni.rating == 10 %}
+                                            ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐  <!-- Bintang penuh -->
+                                        {% endif %}
+                                    </span>
+                                </p>
+                                <p>Komentar: {{ testimoni.teks }}</p>
+                            </div>
+                            <div class="text-end">
+                                {% if user.id == testimoni.id_pelanggan %}
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#hapusModal{{ testimoni.id_tr_pemesanan }}">
+                                    Hapus
+                                </button>
+                    
+                                <!-- Modal Konfirmasi Delete -->
+                                <div class="modal fade" id="hapusModal{{ testimoni.id_tr_pemesanan }}" tabindex="-1" aria-labelledby="hapusModalLabel{{ testimoni.id_tr_pemesanan }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="hapusModalLabel{{ testimoni.id_tr_pemesanan }}">Konfirmasi Hapus</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start">
+                                                Apakah Anda yakin ingin menghapus testimonial ini?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{% url 'service:delete_testimoni' testimoni.id_tr_pemesanan testimoni.id_subkategori %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                                
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                    <div class="testimoni-body">
-                        <p>Teks Testimoni: Pelayanan sangat baik dan cepat!</p>
-                        <p>Nama Pekerja: <strong>Alex</strong></p>
-                        <p>Rating: <span class="rating">⭐⭐⭐⭐⭐</span></p>
-                    </div>
-                </div>
+                {% endfor %}
+            {% else %}
+            <div class="col-12 text-center">
+                <p>Testimoni tidak tersedia</p>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="testimoni-card">
-                    <div class="testimoni-header">
-                        <h5>Jane Smith</h5>
-                        <small>17 November 2024</small>
-                    </div>
-                    <div class="testimoni-body">
-                        <p>Teks Testimoni: Sangat puas dengan hasil pekerjaan!</p>
-                        <p>Nama Pekerja: <strong>Maria</strong></p>
-                        <p>Rating: <span class="rating">⭐⭐⭐⭐⭐</span></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="testimoni-card">
-                    <div class="testimoni-header">
-                        <h5>Michael Lee</h5>
-                        <small>16 November 2024</small>
-                    </div>
-                    <div class="testimoni-body">
-                        <p>Teks Testimoni: Harga sesuai kualitas, sangat recommended!</p>
-                        <p>Nama Pekerja: <strong>David</strong></p>
-                        <p>Rating: <span class="rating">⭐⭐⭐⭐</span></p>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
+        
     </div>
 
     <div class="container my-5">
@@ -275,4 +319,5 @@
             vertical-align: middle;
         }
     </style>
+    
 {% endblock %}
