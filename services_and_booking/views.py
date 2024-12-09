@@ -220,10 +220,22 @@ def create_order(request):
         message = None
         if diskon:
             valid_diskon = OrderService.check_discount_code(diskon,pelanggan_id)
-            if not valid_diskon:
-                message = "Kode diskon yang Anda masukkan tidak valid."
+            if not valid_diskon or float(valid_diskon['min_tr_pemesanan']) > session_price:
+                messages.error(request, "Kode diskon yang Anda masukkan tidak valid atau tidak memenuhi syarat minimal transaksi.")
                 return redirect("service:show_subkategori", subcategory_id=subcategory_id)
             else:
+                if valid_diskon['tipe_diskon'] == "VOUCHER":
+                    try:
+                        OrderService.mark_voucher_as_used(valid_diskon['kode'], pelanggan_id)
+                    except:
+                        messages.error(request, "Voucher telah melewati batas jumlah penggunaan atau batasan hari berlaku.")
+                        return redirect("service:show_subkategori", subcategory_id=subcategory_id)
+                else:
+                    valid_promo = OrderService.check_promo_again(valid_diskon['kode'])
+                    if not valid_promo:
+                        messages.error(request, "Promo sudah melewati tanggal akhir berlaku")
+                        return redirect("service:show_subkategori", subcategory_id=subcategory_id)
+                
                 session_price -= float(valid_diskon['potongan'])
         
         OrderService.create_order(order_id, 
