@@ -70,11 +70,10 @@
                             <td>{{ pesanan.nama_pekerja|default:"-" }}</td>
                             <td>{{ pesanan.status }}</td>
                             <td>
-                                {% if pesanan.status == "Menunggu Pembayaran" or pesanan.status == "Mencari Pekerja Terdekat" %}
+                                {% if pesanan.status == "Menunggu Pembayaran" or pesanan.status == "Mencari Pekerja Terdekat" %} 
                                     <button class="btn btn-danger" style="width: 100%" data-bs-toggle="modal" data-bs-target="#batalkanModal{{ pesanan.id_pemesanan }}">Batalkan</button>
-                                {% elif pesanan.status == "Pesanan Selesai" %}
-                                <!-- ZUFAR -->
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testimoniModal" style="width: 100%;">Buat Testimoni</button>
+                                {% elif pesanan.status == "Pesanan Selesai" %} 
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testimoniModal_{{ pesanan.id_pemesanan }}" style="width: 100%;">Buat Testimoni</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -100,14 +99,81 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="modal fade" id="testimoniModal_{{ pesanan.id_pemesanan }}" tabindex="-1" aria-labelledby="testimoniModalLabel{{ pesanan.id_pemesanan }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="testimoniModalLabel{{ pesanan.id_pemesanan }}">Form Testimoni</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="testimoniForm" method="POST" action="{% url 'service:create_testimoni' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="pesanan_id" value="{{ pesanan.id_pemesanan }}">
+                                            <div class="mb-3">
+                                                <label for="rating" class="form-label">Rating:</label>
+                                                <select class="form-select" id="rating" name="rating" required>
+                                                    <option value="" disabled selected>Pilih rating</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7">7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                    <option value="10">10</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="komentar" class="form-label">Komentar:</label>
+                                                <textarea class="form-control" id="komentar" name="komentar" rows="3" required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
             <div class="alert alert-info text-center" role="alert">
-                Belum ada pemesanan jasa yang tersedia atau sesuai dengan filter yang Anda pilih.            </div>
+                Belum ada pemesanan jasa yang tersedia atau sesuai dengan filter yang Anda pilih.</div>
         {% endif %}
+    </div>
+
+    <div class="container my-5">
+        <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+            {% for message in messages %}
+                <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}primary{% endif %} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Notifikasi</strong>
+                        <small>Baru saja</small>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                var toastList = toastElList.map(function (toastEl) {
+                    return new bootstrap.Toast(toastEl, {
+                        delay: 5000
+                    })
+                })
+                toastList.forEach(toast => toast.show())
+            });
+        </script>
     </div>
 
     <style>
