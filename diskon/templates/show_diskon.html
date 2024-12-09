@@ -1,51 +1,11 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block meta %}
     <title>Diskon</title>
 {% endblock meta %}
 {% block content %}
     {% include 'navbar.html' %}
-    <!-- Modal Sukses -->
-    <div class="modal fade" id="modalSukses" tabindex="-1" aria-labelledby="modalSuksesLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalSuksesLabel">SUKSES</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Selamat! Anda berhasil membeli voucher kode XXX. Voucher ini akan berlaku hingga tanggal XX/XX/XXXX dengan kuota penggunaan sebanyak X kali.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Gagal -->
-    <div class="modal fade" id="modalGagal" tabindex="-1" aria-labelledby="modalGagalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalGagalLabel">GAGAL</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Maaf, saldo Anda tidak cukup untuk membeli voucher ini.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <div class="container my-5">
-        <!-- Diskon Section -->
         <h2 class="text-center mb-4">DISKON</h2>
-        <!-- Voucher Section -->
         <div class="card mb-5">
             <div class="card-body">
                 <h4 class="card-title">Voucher</h4>
@@ -63,26 +23,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for voucher in Voucher %}
+                            {% for voucher1 in voucher %}
                             <tr>
-                                <td>{{ voucher.Kode }}</td>
-                                <td>{{ voucher.Potongan }}</td>
-                                <td>{{ voucher.Min_Transaksi_Pemesanan }}</td>
-                                <td>{{ voucher.Jumlah_Hari_Berlaku }}</td>
-                                <td>{{ voucher.Kuota_Penggunaan }}</td>
-                                <td>{{ voucher.Harga }}</td>
+                                <td>{{ voucher1.kode }}</td>
+                                <td>{{ voucher1.potongan }}</td>
+                                <td>{{ voucher1.min_tr_pemesanan }}</td>
+                                <td>{{ voucher1.jml_hari_berlaku }}</td>
+                                <td>{{ voucher1.kuota_penggunaan }}</td>
+                                <td>{{ voucher1.harga }}</td>
                                 <td>
-                                    <button 
-                                        type="button" 
-                                        class="btn btn-primary" 
-                                        data-harga="{{ voucher.Harga }}" 
-                                        data-kode="{{ voucher.Kode }}" 
-                                        data-kuota="{{ voucher.Kuota_Penggunaan }}" 
-                                        onclick="handleBeli(this)">
-                                        Beli
+                                    <!-- Tombol untuk membuka modal -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#voucherModal"
+                                    data-kode_voucher="{{ voucher1.kode }}"
+                                    data-harga="{{ voucher1.harga }}"
+                                    data-potongan="{{ voucher1.potongan }}"
+                                    data-jml_hari_berlaku="{{ voucher1.jml_hari_berlaku }}"
+                                    data-min-transaksi="{{ voucher1.min_tr_pemesanan }}"
+                                    data-kuota="{{ voucher1.kuota_penggunaan }}">
+                                    Beli
                                     </button>
                                 </td>
-                                                              
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -90,9 +50,12 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Promo Section -->
-        <div class="card">
+    <!-- Bagian Promo -->
+    <div class="container my-5">
+        <h2 class="text-center mb-4"></h2>
+        <div class="card mb-5">
             <div class="card-body">
                 <h4 class="card-title">Promo</h4>
                 <div class="table-responsive">
@@ -104,10 +67,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for promo in Promo %}
+                            {% for promo in promo %}
                             <tr>
-                                <td>{{ promo.Kode }}</td>
-                                <td>{{ promo.Tanggal_Akhir_Berlaku }}</td>
+                                <td>{{ promo.kode }}</td>
+                                <td>{{ promo.tgl_akhir_berlaku }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -116,35 +79,96 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Form Pembelian -->
+    <div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="voucherModalLabel">Pembelian Voucher</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'diskon:beli_voucher' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="kode_voucher" id="kode_voucher">
+                        <input type="hidden" name="harga_voucher" id="harga_voucher">
+                        <input type="hidden" name="potongan_voucher" id="potongan_voucher">
+                        <input type="hidden" name="min_tr_pemesanan" id="min_tr_pemesanan">
+                        <input type="hidden" name="kuota_penggunaan" id="kuota_penggunaan">
+                        <input type="hidden" name="jml_hari_berlaku" id="jml_hari_berlaku">
+
+                        <div class="mb-3">
+                            <label for="metodePembayaran" class="form-label">Metode Pembayaran</label>
+                            <select class="form-select" id="metode_pembayaran" name="metode_pembayaran">
+                                {% for metode in metode_bayar %}
+                                    <option value="{{ metode.id }}">{{ metode.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Beli</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        {% if status_modal == "sukses" %}
+        <div id="toastSukses" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message | safe }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% elif status_modal == "gagal" %}
+        <div id="toastGagal" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message | safe }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
     <script>
-        // Saldo pengguna (simulasi)
-        const saldoPengguna = 50000; // Contoh saldo pengguna untuk demo
+        // JavaScript untuk memuat data voucher yang dipilih ke dalam form modal
+        var beliVoucherButtons = document.querySelectorAll('.btn-primary');
+        beliVoucherButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var kode_voucher = button.getAttribute('data-kode_voucher');
+                var harga = button.getAttribute('data-harga');
+                var potongan = button.getAttribute('data-potongan');
+                var min_transaksi = button.getAttribute('data-min-transaksi');
+                var kuota = button.getAttribute('data-kuota');
+                var jml_hari_berlaku = button.getAttribute('data-jml_hari_berlaku');
+
     
-        function handleBeli(button) {
-            // Ambil data dari atribut tombol
-            const hargaVoucher = parseInt(button.getAttribute('data-harga'));
-            const kodeVoucher = button.getAttribute('data-kode');
-            const kuotaPenggunaan = button.getAttribute('data-kuota');
-    
-            if (saldoPengguna >= hargaVoucher) {
-                // Jika saldo cukup, perbarui konten modal sukses dengan data voucher
-                const modalSukses = new bootstrap.Modal(document.getElementById('modalSukses'));
-                const modalBody = document.querySelector('#modalSukses .modal-body');
-                
-                modalBody.innerHTML = `
-                    Selamat! Anda berhasil membeli voucher kode <strong>${kodeVoucher}</strong>. 
-                    Voucher ini akan berlaku hingga tanggal XX/XX/XXXX
-                    dengan kuota penggunaan sebanyak <strong>${kuotaPenggunaan}</strong> kali.
-                `;
-                
-                modalSukses.show();
-            } else {
-                // Jika saldo tidak cukup, tampilkan modal gagal
-                const modalGagal = new bootstrap.Modal(document.getElementById('modalGagal'));
-                modalGagal.show();
+                document.getElementById('kode_voucher').value = kode_voucher;
+                document.getElementById('harga_voucher').value = harga;
+                document.getElementById('potongan_voucher').value = potongan;
+                document.getElementById('min_tr_pemesanan').value = min_transaksi;
+                document.getElementById('kuota_penggunaan').value = kuota;
+                document.getElementById('jml_hari_berlaku').value = jml_hari_berlaku;
+
+            });
+        });
+
+        window.onload = function() {
+            if (document.getElementById("toastSukses")) {
+                var toast = new bootstrap.Toast(document.getElementById("toastSukses"));
+                toast.show();
             }
-        }
+            if (document.getElementById("toastGagal")) {
+                var toast = new bootstrap.Toast(document.getElementById("toastGagal"));
+                toast.show();
+            }
+        };
     </script>
-    
-    
+
 {% endblock content %}
