@@ -173,84 +173,100 @@ def show_login(request):
 def register(request):
     pengguna_form = PenggunaRegistrationForm()
     pekerja_form = PekerjaRegistrationForm()
+    error_message = None
+
     if request.method == "POST":
-        # Register user
         if request.POST["user_type"] == "pengguna":
-            # Register pengguna
             pengguna_form = PenggunaRegistrationForm(request.POST)
             if not pengguna_form.is_valid():
+                error_message = "Invalid form submission."
                 return render(
                     request,
                     "show_register.html",
                     {
                         "pengguna_form": pengguna_form,
                         "pekerja_form": pekerja_form,
+                        "error_message": error_message,
                     },
                 )
 
-            name = request.POST["name"]
-            password = request.POST["password"]
-            gender = request.POST["gender"]
-            phone_number = request.POST["phone_number"]
-            birthdate = request.POST["birthdate"]
-            address = request.POST["address"]
-
             try:
                 UserService.create_pengguna(
-                    name, password, gender, phone_number, birthdate, address
+                    request.POST["name"],
+                    request.POST["password"],
+                    request.POST["gender"],
+                    request.POST["phone_number"],
+                    request.POST["birthdate"],
+                    request.POST["address"],
                 )
             except Exception as e:
-                return JsonResponse(
-                    {"message": "Failed to register user", "error": str(e)}, status=500
-                )
-
-            return redirect("user:show_login")
-        elif request.POST["user_type"] == "pekerja":
-            # Register pekerja
-            pekerja_form = PekerjaRegistrationForm(request.POST)
-            if not pekerja_form.is_valid():
+                error_message = "Failed to register user. Please try again later."
                 return render(
                     request,
                     "show_register.html",
                     {
                         "pengguna_form": pengguna_form,
                         "pekerja_form": pekerja_form,
+                        "error_message": error_message,
+                    },
+                )
+
+            return redirect("user:show_login")
+
+        elif request.POST["user_type"] == "pekerja":
+            pekerja_form = PekerjaRegistrationForm(request.POST)
+            if not pekerja_form.is_valid():
+                error_message = "Invalid form submission."
+                return render(
+                    request,
+                    "show_register.html",
+                    {
+                        "pengguna_form": pengguna_form,
+                        "pekerja_form": pekerja_form,
+                        "error_message": error_message,
                         "show_pekerja": True,
                     },
                 )
 
-            name = request.POST["name"]
-            password = request.POST["password"]
-            gender = request.POST["gender"]
-            phone_number = request.POST["phone_number"]
-            birthdate = request.POST["birthdate"]
-            address = request.POST["address"]
-            bank_name = request.POST["bank_name"]
-            bank_account_number = request.POST["bank_account_number"]
-            npwp = request.POST["npwp"]
-            photo_url = request.POST["photo_url"]
-
             try:
                 UserService.create_pekerja(
-                    name,
-                    password,
-                    gender,
-                    phone_number,
-                    birthdate,
-                    address,
-                    bank_name,
-                    bank_account_number,
-                    npwp,
-                    photo_url,
+                    request.POST["name"],
+                    request.POST["password"],
+                    request.POST["gender"],
+                    request.POST["phone_number"],
+                    request.POST["birthdate"],
+                    request.POST["address"],
+                    request.POST["bank_name"],
+                    request.POST["bank_account_number"],
+                    request.POST["npwp"],
+                    request.POST["photo_url"],
                 )
             except Exception as e:
-                return JsonResponse(
-                    {"message": "Failed to register user", "error": str(e)}, status=500
+                error_message = "Failed to register user. Please try again later."
+                return render(
+                    request,
+                    "show_register.html",
+                    {
+                        "pengguna_form": pengguna_form,
+                        "pekerja_form": pekerja_form,
+                        "error_message": error_message,
+                        "show_pekerja": True,
+                    },
                 )
 
             return redirect("user:show_login")
+
         else:
-            return JsonResponse({"message": "Invalid user type"}, status=400)
+            error_message = "Invalid user type."
+            return render(
+                request,
+                "show_register.html",
+                {
+                    "pengguna_form": pengguna_form,
+                    "pekerja_form": pekerja_form,
+                    "error_message": error_message,
+                },
+            )
 
     return render(
         request,
