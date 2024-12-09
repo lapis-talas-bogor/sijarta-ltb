@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
 <title>MyPay</title>
 {% endblock meta %}
 {% block content %}
 {% include 'navbar.html' %}
 <div class="container mt-4">
+<form action="" method="post">
+  {% csrf_token %} 
 <div class="border rounded p-2 mt-3 mb-3">
     <div class="container text-center">
         <div class="row justify-content-md-center">
@@ -15,8 +18,6 @@
                   Kategori
                 </button>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#" id="kategori">Home Cleaning</a></li>
-                  <li><a class="dropdown-item" href="#" id="kategori">Massage</a></li>
                 </ul>
               </div>              
           </div>
@@ -26,123 +27,109 @@
                   Subkategori
                 </button>
                 <ul class="dropdown-menu" id="subkategori">
-                  <!-- <li><a class="dropdown-item" href="#">Action</a></li> -->
                 </ul>
               </div>
-              
           </div>
           <div class="col col-lg-2">
-            <button type="button" class="btn btn-primary text-white w-100">Search</button>
+            <input type="text" hidden name="nama_kategori" id="nama_kategori">
+            <input type="text" hidden name="nama_subkategori" id="nama_subkategori">
+            <button type="submit" class="btn btn-primary text-white w-100">Search</button>
           </div>
         </div>
     </div>
     </div>
+</form>
     <div class="border rounded p-3" id="state">
+      {% for kerjaan in kerjaan %}
+      <form action="{% url 'pekerjajasa:ambil_pekerjaan' %}" method="post">
+        {% csrf_token %}    
         <div class="card mb-3">
             <div class="card-header">
-                <h5>Pembersihan Dapur</h5>
+                <h5>{{ kerjaan.nama_subkategori }}</h5>
             </div>
             <div class="card-body">
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Nama</p>
-                <p class="d-flex" style="flex:0 0 80%">: Violet</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ kerjaan.nama_pelanggan }}</p>
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Tanggal Pemesanan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 18 Oktober 2024</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ kerjaan.tanggal_pemesanan }}</p>
               </div>
               <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pekerjaan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 19 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp25.000</p>
-              </div>
-              <a href="#" class="btn btn-primary">Kerjakan sekarang</a>
-            </div>
-          </div>
-          <div class="card mb-3">
-            <div class="card-header">
-                <h5>Setrika</h5>
-            </div>
-            <div class="card-body">
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Nama</p>
-                <p class="d-flex" style="flex:0 0 80%">: Powder</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pemesanan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 23 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pekerjaan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 24 Oktober 2024</p>
+                <p class="d-flex" style="flex:0 0 20%">Sesi</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ kerjaan.sesi }}</p>
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp990.000</p>
+                <p class="d-flex" style="flex:0 0 80%">: Rp{{ kerjaan.total_biaya|intcomma }}</p>
               </div>
-              <a href="#" class="btn btn-primary">Kerjakan sekarang</a>
+              <input type="text" name="id_kerjaan" hidden value="{{ kerjaan.id }}">
+              <button type="submit" class="btn btn-primary">Kerjakan sekarang</button>
             </div>
           </div>
-          <div class="card mb-3">
-            <div class="card-header">
-                <h5>Daily Cleaning</h5>
-            </div>
-            <div class="card-body">
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Nama</p>
-                <p class="d-flex" style="flex:0 0 80%">: Maddie</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pemesanan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 25 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pekerjaan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 27 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp500.000</p>
-              </div>
-              <a href="#" class="btn btn-primary">Kerjakan sekarang</a>
-            </div>
-          </div>
+        </form>
+          {% endfor %}
     </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const kategoris = document.querySelectorAll('#kategori');
-        const kategoritr = document.getElementById('subkategori');
-        const kategori = document.getElementById('kategori')
-        let state = ``;
-        const state_1 = `
-        <li><a class="dropdown-item" href="#">Setrika</a></li>
-        <li><a class="dropdown-item" href="#">Daily Cleaning</a></li>
-        <li><a class="dropdown-item" href="#">Pembersihan Dapur</a></li>`;
-        const state_2 = ``;
-        
-        kategoris.forEach(item => {
-            item.addEventListener('click', function () {
-                const category = this.textContent.trim();
-                switch (category) {
-                    case 'Home Cleaning':
-                        state = state_1;
-                        break;
-                    case 'Massage':
-                        state = state_2;
-                        break;
-                    default:
-                        state = ``;
-                        break;
-                }
-                kategoritr.innerHTML = `${state}`;
-                kategori.innerHTML = `${category}`;
+document.addEventListener("DOMContentLoaded", function () {
+    const kategoriDropdown = document.getElementById("kategori");
+    const subkategoriDropdown = document.getElementById("subkategori");
+    const namaKategori = document.getElementById("nama_kategori");
+    const namaSubkategori = document.getElementById("nama_subkategori");
+
+    fetch('/pekerjajasa/get-subcategories/')
+        .then(response => response.json())
+        .then(data => {
+            for (const [kategori, subkategoriList] of Object.entries(data)) {
+                const li = document.createElement("li");
+                const link = document.createElement("a");
+                link.className = "dropdown-item";
+                link.href = "#";
+                link.textContent = kategori;
+                link.setAttribute("data-category", kategori);
+                li.appendChild(link);
+                kategoriDropdown.nextElementSibling.appendChild(li);
+            }
+
+            kategoriDropdown.nextElementSibling.addEventListener("click", function (e) {
+            const selectedCategory = e.target.getAttribute("data-category");
+            if (!selectedCategory) return;
+
+            kategoriDropdown.textContent = selectedCategory;
+            namaKategori.value = selectedCategory;
+
+            subkategoriDropdown.innerHTML = ""; 
+            data[selectedCategory].forEach(subkategori => {
+                const li = document.createElement("li");
+                const link = document.createElement("a");
+                link.className = "dropdown-item";
+                link.href = "#";
+                link.textContent = subkategori[0];
+                link.setAttribute("data-subcategory", subkategori[0]); 
+                link.setAttribute("id-subcategory", subkategori[1])
+                li.appendChild(link);
+                subkategoriDropdown.appendChild(li);
+            });
+
+            subkategoriDropdown.querySelectorAll(".dropdown-item").forEach(item => {
+                item.addEventListener("click", function (e) {
+                    const selectedSubcategory = e.target.getAttribute("data-subcategory");
+                    if (selectedSubcategory) {
+                        subkategoriDropdown.previousElementSibling.textContent = selectedSubcategory;
+                        namaSubkategori.value = selectedSubcategory;
+                    }
+                });
             });
         });
-    });
-</script>
+
+        })
+        .catch(error => console.error("Error fetching categories:", error));
+});
+
+  </script>
+  
+
 {% endblock content %}

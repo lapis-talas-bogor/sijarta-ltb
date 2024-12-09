@@ -14,7 +14,7 @@ def show_landing(request):
     context = {
         "user": request.user,
     }
-
+    
     if not context["user"]["is_authenticated"]:
         return render(request, "show_landing.html")
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
 <title>MyPay</title>
 {% endblock meta %}
@@ -7,10 +8,12 @@
 {% include 'navbar.html' %}
 <div class="container mt-4">
     <div class="border rounded p-3 mb-3">
+      <form action="/pekerjajasa/status/" method="post">
+        {% csrf_token %}    
         <div class="container">
             <div class="row g-3 align-items-center justify-content-center">
                 <div class="col-lg-5">
-                    <input type="text" class="form-control" placeholder="Nama Jasa">
+                    <input type="text" name="match" class="form-control" placeholder="Nama Jasa">
                 </div>
                 <div class="col-lg-3">
                     <div class="dropdown">
@@ -18,73 +21,79 @@
                           Status
                         </button>
                         <ul class="dropdown-menu">
-                          <li><a class="dropdown-item w-100" href="#" id="kategori">Status 1</a></li>
+                          <li><a class="dropdown-item w-100" href="#" id="kategori" id-value="">Semua</a></li>
+                          {% for status in statuses %}
+                          <li><a class="dropdown-item w-100" href="#" id="kategori" id-value="{{ status.id }}">{{ status.status }}</a></li>
+                          {% endfor %}
                         </ul>
                       </div>     
+                      <input type="text" hidden name="status" id="selector">
                 </div>
                 <div class="col-lg-2">
                     <button class="btn btn-success w-100 text-white">Search</button>
                 </div>
             </div>
         </div>
+      </form>
     </div>
-
     <div class="border rounded p-3" id="state">
+      {% for pekerjaan in pekerjaan %}
+      <form action="/pekerjajasa/update_status/" method="post">
+        {% csrf_token %} 
         <div class="card mb-3">
             <div class="card-header">
                 <div class="d-flex justify-content-between">
-                    <h5>Daily Cleaning</h5>
-                    <h5>Melakukan Pelayanan Jasa</h5>
+                    <h5>{{ pekerjaan.nama_subkategori }}</h5>
+                    <h5>{{ pekerjaan.status }}</h5>
                 </div>
             </div>
             <div class="card-body">
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Nama</p>
-                <p class="d-flex" style="flex:0 0 80%">: Caitlyn Kiramman</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ pekerjaan.nama_pelanggan }}</p>
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Tanggal Pemesanan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 11 Oktober 2024</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ pekerjaan.tanggal_pemesanan }}</p>
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Tanggal Pekerjaan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 12 Oktober 2024</p>
+                <p class="d-flex" style="flex:0 0 80%">: {{ pekerjaan.tanggal_pekerjaan }}</p>
               </div>
               <div class="d-flex">
                 <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp500.000</p>
+                <p class="d-flex" style="flex:0 0 80%">: Rp{{ pekerjaan.total_biaya|intcomma }}</p>
               </div>
-              <a href="#" class="btn btn-primary">Update Status</a>
+              <input type="text" name="id" hidden value="{{ pekerjaan.id }}">
+              {% if pekerjaan.status != "Pekerjaan Selesai" %}
+              <button type="submit" class="btn btn-primary">Update Status</button>
+              {% endif %}
             </div>
-          </div>
-          <div class="card mb-2">
-            <div class="card-header">
-                <div class="d-flex justify-content-between">
-                    <h5>Daily Cleaning</h5>
-                    <h5>Melakukan Pelayanan Jasa</h5>
-                </div>
-            </div>
-            <div class="card-body">
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Nama</p>
-                <p class="d-flex" style="flex:0 0 80%">: Baskara Putra</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pemesanan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 12 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Tanggal Pekerjaan</p>
-                <p class="d-flex" style="flex:0 0 80%">: 13 Oktober 2024</p>
-              </div>
-              <div class="d-flex">
-                <p class="d-flex" style="flex:0 0 20%">Total Biaya</p>
-                <p class="d-flex" style="flex:0 0 80%">: Rp100.000</p>
-              </div>
-              <a href="#" class="btn btn-primary">Update Status</a>
-            </div>
-          </div>
-    </div>
+        </div>
+      </form>
+          {% empty %}
+            Belum ada pekerjaan.
+          {% endfor %}
   </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dropdownItems = document.querySelectorAll(".dropdown-item");
+    const dropdownButton = document.getElementById("kategori");
+    const status_select = document.getElementById("selector")
+
+    dropdownItems.forEach((item) => {
+        item.addEventListener("click", function (event) {
+            event.preventDefault(); 
+            const statusName = this.textContent.trim();
+            const statusId = this.getAttribute("id-value");
+            dropdownButton.textContent = statusName;
+            status_select.value = statusId;
+        });
+    }); 
+    
+});
+</script>
 
 {% endblock content %}

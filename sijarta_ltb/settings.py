@@ -35,8 +35,16 @@ SECRET_KEY = os.getenv(
 PRODUCTION = os.getenv("PRODUCTION", False)
 DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "sijartaltb.pythonanywhere.com"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "basdat.sijarta-ltb.site",
+]
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -47,13 +55,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_browser_reload",
     "users",
     "mypay",
     "pekerjajasa",
     "diskon",
     "services_and_booking",
+    "django.contrib.humanize",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ["django_browser_reload"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block meta %}
     <title>Transaksi</title>
 {% endblock meta %}
@@ -9,135 +10,144 @@
         <div class="border rounded mb-3">
             <div class="container mt-4">
                 <div class="d-flex justify-content-between mb-2">
-                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">Powder</div>
+                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">{{ user.name }}</div>
                     <div class="p-2 border rounded">{% now "d-m-Y" %}</div>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">Saldo: Rp8.000.000</div>
+                    <div class="p-2 border rounded" style="flex: 1; max-width: 50%;">Saldo: Rp{{ user.mypay_balance|intcomma }}</div>
                 </div>
                 <div class="dropdown mb-3">
-                    <button class="btn btn-success dropdown-toggle"
-                            id="kategori_transaksi"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">Kategori Transaksi</button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="#">TopUp MyPay</a>
-                        </li>
-                        {% if user.is_pengguna %}
-                            <li>
-                                <a class="dropdown-item" href="#">Bayar Transaksi</a>
-                            </li>
-                        {% endif %}
-                        <li>
-                            <a class="dropdown-item" href="#">Transfer MyPay</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#">Withdrawal</a>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
-        <div class="border rounded p-3" id="state"></div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dropdownItems = document.querySelectorAll('.dropdown-item');
-            const stateDiv = document.getElementById('state');
-            const dropdown = document.getElementById('kategori_transaksi');
-            let state = ``;
-
-            const state_1 = `<form action="">
-        <div class="mb-3">
-            <label for="formGroupExampleInput" class="form-label">Top up</label>
-            <input type="number" min="0" class="form-control" id="formGroupExampleInput" placeholder="Masukan jumlah nominal saldo">
-          </div>
-            <button type="button" class="btn btn-success">Top up</button>
-        </form>`;
-
-            const state_2 = `<form action="">
-        <div class="mb-3 d-flex">
-            <div class="me-3">
-                <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Pesanan Jasa
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div>
-                <input type="text" class="form-control" placeholder="Harga Jasa" aria-label="Harga Jasa">
-            </div>
-        </div>
-        <div class="d-flex">
-            <button type="button" class="btn btn-success">Bayar</button>
-        </div>
-    </form>`;
-
-            const state_3 = `<form>
-            <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">No HP</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-            </div>
-            <div class="mb-3">
-              <label for="exampleInputPassword1" class="form-label">Nominal</label>
-              <input type="number" min="0" class="form-control" id="exampleInputPassword1">
-            </div>
-            <button type="submit" class="btn btn-success">Bayar</button>
-          </form>`;
-
-            const state_4 = `<form>
-            <div class="dropdown mb-3">
-                <button class="btn btn-success dropdown-toggle" id="kategori_transaksi" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Nama Bank
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">BANK X</a></li>
-                  <li><a class="dropdown-item" href="#">BANK X</a></li>
-                  <li><a class="dropdown-item" href="#">BANK X</a></li>
-                  <li><a class="dropdown-item" href="#">BANK X</a></li>
-                </ul>
+        <div class="border rounded p-3" id="state">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="pills-topup-tab" data-bs-toggle="pill" data-bs-target="#pills-topup" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Top Up</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pills-transfer-tab" data-bs-toggle="pill" data-bs-target="#pills-transfer" type="button" role="tab" aria-controls="pills-transfer" aria-selected="false">Transfer</button>
+                </li>
+                {% if user.is_pengguna %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pills-bayar-tab" data-bs-toggle="pill" data-bs-target="#pills-bayar" type="button" role="tab" aria-controls="pills-bayar" aria-selected="false">Bayar Jasa</button>
+                </li>
+                {% endif %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-withdrawal-tab" data-bs-toggle="pill" data-bs-target="#pills-withdrawal" type="button" role="tab" aria-controls="pills-withdrawal" aria-selected="false">Withdrawal</button>
+                </li>
+              </ul>
+              <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-topup" role="tabpanel" aria-labelledby="pills-topup-tab">{% include 'forms/topup.html' %}</div>
+                <div class="tab-pane fade" id="pills-transfer" role="tabpanel" aria-labelledby="pills-transfer-tab">{% include 'forms/transfer.html' %}</div>
+                {% if user.is_pengguna %}
+                <div class="tab-pane fade" id="pills-bayar" role="tabpanel" aria-labelledby="pills-bayar-tab">{% include 'forms/bayar_jasa.html' %}</div>
+                {% endif %}
+                <div class="tab-pane fade" id="pills-withdrawal" role="tabpanel" aria-labelledby="pills-withdrawal-tab">{% include 'forms/withdrawal.html' %}</div>
               </div>
-            <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">No Rekening</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-            </div>
-            <div class="mb-3">
-              <label for="exampleInputPassword1" class="form-label">Nominal</label>
-              <input type="number" min="0" class="form-control" id="exampleInputPassword1">
-            </div>
-            <button type="submit" class="btn btn-success">Bayar</button>
-          </form>`;
+        </div>
 
-            dropdownItems.forEach(item => {
-                item.addEventListener('click', function () {
-                    const category = this.textContent.trim();
-                    switch (category) {
-                        case 'TopUp MyPay':
-                            state = state_1;
-                            break;
-                        case 'Bayar Transaksi':
-                            state = state_2;
-                            break;
-                        case 'Transfer MyPay':
-                            state = state_3;
-                            break;
-                        case 'Withdrawal':
-                            state = state_4;
-                            break;
-                        default:
-                            state = ``;
-                            break;
-                    }
-                    dropdown.innerHTML = `${category}`;
-                    stateDiv.innerHTML = `${state}`;
-                });
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Warning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+            </div>
+        </div>
+        </div>
+        
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // input validator, jika tidak sesuai akan memunculkan droppdown
+        async function handleFormSubmit(event, formSelector, endpoint) {
+        event.preventDefault();
+        const form = document.querySelector(formSelector);
+        const formData = new FormData(form);
+    
+        try {
+            const response = await fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            });
+    
+            const result = await response.json();
+    
+            if (!response.ok) {
+            document.getElementById('modalMessage').textContent = result.message || "Terjadi kesalahan.";
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+            } else {
+            window.location.href = result.redirect_url || '/mypay/transaksi';
+            }
+        } catch (error) {
+            document.getElementById('modalMessage').textContent = "Gagal memproses permintaan.";
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+        }
+        
+        // Handler untuk masing-masing form
+
+        const topupForm = document.querySelector('#form-topup');
+        if (topupForm) {
+            topupForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-topup', '/mypay/topup/'));
+        }
+    
+        const withdrawalForm = document.querySelector('#form-withdrawal');
+        if (withdrawalForm) {
+            withdrawalForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-withdrawal', '/mypay/withdrawal/'));
+        }
+    
+        const transferForm = document.querySelector('#form-transfer');
+        if (transferForm) {
+            transferForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-transfer', '/mypay/transfer/'));
+        }
+    
+        const bayarForm = document.querySelector('#form-bayar-jasa');
+        if (bayarForm) {
+            bayarForm.addEventListener('submit', (event) => handleFormSubmit(event, '#form-bayar-jasa', '/mypay/bayar_jasa/'));
+        }
+
+        // Blok kode di bawah ini berfungsi untuk mengubah nama dropdown bank secara dinamis pada withdrawal
+        const dropdown = document.getElementById("kategori_transaksi");
+        const namaBankInput = document.getElementById("nama_bank");
+        const bankOptions = document.querySelectorAll("#bank-options .dropdown-item");
+
+        bankOptions.forEach(option => {
+            option.addEventListener("click", (e) => {
+                e.preventDefault(); 
+                const selectedBank = option.getAttribute("data-value"); 
+                dropdown.textContent = selectedBank; 
+                namaBankInput.value = selectedBank; 
             });
         });
-        </script>
-    {% endblock content %}
+
+        const pesananMenu = document.getElementById("pesanan_menu");
+        const hargaJasa = document.getElementById("harga_jasa");
+        const inputIdPesanan = document.getElementById("input_id_pesanan");
+        const inputHargaPesanan = document.getElementById("input_harga_pesanan");
+        const pesananDropdown = document.getElementById("pesanan_dropdown");
+
+        pesananMenu.addEventListener('click', function(e) {
+            const selectedPesanan = e.target;
+            if (selectedPesanan.tagName === 'A') {
+                pesananDropdown.textContent = selectedPesanan.textContent;
+                const harga = selectedPesanan.getAttribute("data-harga");
+                hargaJasa.textContent = `Harga: Rp${harga}`;           
+                inputIdPesanan.value = selectedPesanan.getAttribute("data-id");
+                inputHargaPesanan.value = harga;
+            }
+        });
+    });
+    
+</script>
+{% endblock content %}

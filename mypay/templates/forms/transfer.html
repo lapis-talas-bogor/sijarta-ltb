@@ -1,0 +1,12 @@
+<form action="/mypay/transfer/" method="post" id="form-transfer">
+    {% csrf_token %}    
+    <div class="mb-3">
+      <label for="no_hp" class="form-label">No HP</label>
+      <input name="no_hp" required class="form-control" id="no_hp">
+    </div>
+    <div class="mb-3">
+      <label for="nominal" class="form-label">Nominal</label>
+      <input type="number" required name = "nominal" min="0" class="form-control" id="nominal">
+    </div>
+    <button type="submit" class="btn btn-success">Bayar</button>
+</form>

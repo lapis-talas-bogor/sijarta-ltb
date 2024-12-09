@@ -1,0 +1,23 @@
+<form action="/mypay/withdrawal/" method="post" id="form-withdrawal">
+    {% csrf_token %}   
+    <div class="dropdown mb-3">
+        <button class="btn btn-success dropdown-toggle" id="kategori_transaksi" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Bank BCA
+        </button>
+        <ul class="dropdown-menu" id="bank-options">
+        <li><a class="dropdown-item" id='bank' href="#" data-value="Bank BCA">Bank BCA</a></li>
+        <li><a class="dropdown-item" id='bank' href="#" data-value="Bank BRI">Bank BRI</a></li>
+        <li><a class="dropdown-item" id='bank' href="#" data-value="Bank Mandiri">Bank Mandiri</a></li>
+        <li><a class="dropdown-item" id='bank' href="#" data-value="Bank CIMB NIAGA">Bank CIMB NIAGA</a></li>
+        </ul>
+    </div>
+    <div class="mb-3">
+        <label for="norek" class="form-label">No Rekening</label>
+        <input type="text" id="norek" required name="norek" minlength="10" pattern="[0-9]{10,}" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="nominal" class="form-label">Nominal</label>
+        <input type="number" required name="nominal" min="0" class="form-control" id="nominal">
+    </div>
+    <button type="submit" class="btn btn-success">Bayar</button>
+</form>

@@ -1,0 +1,29 @@
+<form action="/mypay/bayar_jasa/" method="post" id="form-bayar-jasa">
+    {% csrf_token %}    
+    <div class="mb-3 d-flex align-items-center">
+        <div class="me-3">
+            <div class="dropdown">
+                <button class="btn btn-success dropdown-toggle" id="pesanan_dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Pesanan Jasa
+                </button>
+                <ul class="dropdown-menu" id="pesanan_menu">
+                    {% for pesanan in pesanan %}
+                    <li>
+                        <a class="dropdown-item" href="#" data-harga="{{ pesanan.total_biaya }}" data-id="{{ pesanan.id }}"> {{ pesanan.nama_subkategori }} </a>
+                    </li>
+                    {% empty %}
+                        Kamu belum memiliki pesanan
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div id="harga_jasa" class="p-1 border rounded">
+            Pilih pesanan untuk melihat harga
+        </div>
+    </div>
+    <input type="hidden" name="id_pesanan" id="input_id_pesanan">
+    <input type="hidden" name="harga_pesanan" id="input_harga_pesanan">
+    <div class="d-flex">
+        <button type="submit" class="btn btn-success">Bayar</button>
+    </div>
+</form>
