@@ -47,14 +47,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_browser_reload",
     "users",
     "mypay",
     "pekerjajasa",
     "diskon",
     "services_and_booking",
-    'django.contrib.humanize',
+    "django.contrib.humanize",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ["django_browser_reload"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
