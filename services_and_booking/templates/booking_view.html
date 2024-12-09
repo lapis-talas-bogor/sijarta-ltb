@@ -1,124 +1,128 @@
 {% extends 'base.html' %}
+
 {% block meta %}
     <title>View Pemesanan Jasa</title>
 {% endblock meta %}
+
 {% block content %}
     {% include 'navbar.html' %}
-    <div class="modal fade" id="testimoniModal" tabindex="-1" aria-labelledby="testimoniModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="testimoniModalLabel">Form Testimoni</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="testimoniForm">
-                        <div class="mb-3">
-                            <label for="rating" class="form-label">Rating:</label>
-                            <select class="form-select" id="rating" required>
-                                <option value="" disabled selected>Pilih rating</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="komentar" class="form-label">Komentar:</label>
-                            <textarea class="form-control" id="komentar" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="container my-5">
         <h2 class="text-center">View Pemesanan Jasa</h2>
         <br>
-        <div class="row mb-4">
-            <div class="col-md-4">
+
+        <form method="POST" class="row mb-4 justify-content-center">
+            {% csrf_token %}
+            <div class="col-md-3">
                 <div class="input-group">
                     <label class="input-group-text" for="filter-subkategori">Subkategori</label>
-                    <select class="form-select" id="filter-subkategori">
-                        <option selected>Pilih Subkategori</option>
-                        <option value="Reparasi Televisi">Reparasi Televisi</option>
-                        <option value="Reparasi Kulkas">Reparasi Kulkas</option>
-                        <option value="Reparasi Mesin Cuci">Pengiriman Barang</option>
+                    <select class="form-select" id="filter-subkategori" name="filter-subkategori">
+                        <option value="Pilih Subkategori" {% if not subkategori_filter %}selected{% endif %}>Pilih Subkategori</option>
+                        {% for subkategori in subkategori_options %}
+                            <option value="{{ subkategori }}" {% if subkategori_filter == subkategori %}selected{% endif %}>{{ subkategori }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <div class="input-group">
                     <label class="input-group-text" for="filter-status">Status Pesanan</label>
-                    <select class="form-select" id="filter-status">
-                        <option selected>Pilih Status Pesanan</option>
-                        <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
-                        <option value="Mencari Pekerja Terdekat">Mencari Pekerja Terdekat</option>
-                        <option value="Pesanan Selesai">Pesanan Selesai</option>
-                        <option value="Sedang Diproses">Sedang Diproses</option>
+                    <select class="form-select" id="filter-status" name="filter-status">
+                        <option value="Pilih Status Pesanan" {% if not status_filter %}selected{% endif %}>Pilih Status Pesanan</option>
+                        {% for status in status_options %}
+                            <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ status }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="search-bar" placeholder="Cari Pesanan">
-                    <button class="btn btn-primary" type="button">Search</button>
-                </div>
+
+            <div class="col-md-2 d-flex align-items-center">
+                <button class="btn btn-primary" type="submit" style="width: 100%;">Search</button>
             </div>
-        </div>
+
+            <div class="col-md-2 d-flex align-items-center">
+                <a href="{% url 'service:show_booking_view' %}" class="btn btn-secondary" style="width: 100%;">Reset</a>
+            </div>
+        </form>
 
         <br>
 
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Subkategori</th>
-                        <th>Sesi Layanan</th>
-                        <th>Harga</th>
-                        <th>Nama Pekerja</th>
-                        <th>Status</th>
-                        <th>   </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pesanan in pesanan_list %}
-                    <tr>
-                        <td>{{ pesanan.subkategori }}</td>
-                        <td>{{ pesanan.sesi_layanan }}</td>
-                        <td>{{ pesanan.harga }}</td>
-                        <td>{{ pesanan.nama_pekerja|default:"-" }}</td>
-                        <td>{{ pesanan.status }}</td>
-                        <td>
-                            {% if pesanan.status == "Menunggu Pembayaran" or pesanan.status == "Mencari Pekerja Terdekat" %}
-                                <button class="btn btn-danger">Batalkan</button>
-                            {% elif pesanan.status == "Pesanan Selesai" %}
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testimoniModal">Buat Testimoni</button>
-                                
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% if pesanan_list %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Subkategori</th>
+                            <th>Sesi Layanan</th>
+                            <th>Harga</th>
+                            <th>Nama Pekerja</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pesanan in pesanan_list %}
+                        <tr>
+                            <td>{{ pesanan.subkategori }}</td>
+                            <td>{{ pesanan.sesi_layanan }}</td>
+                            <td>{{ pesanan.harga }}</td>
+                            <td>{{ pesanan.nama_pekerja|default:"-" }}</td>
+                            <td>{{ pesanan.status }}</td>
+                            <td>
+                                {% if pesanan.status == "Menunggu Pembayaran" or pesanan.status == "Mencari Pekerja Terdekat" %}
+                                    <button class="btn btn-danger" style="width: 100%" data-bs-toggle="modal" data-bs-target="#batalkanModal{{ pesanan.id_pemesanan }}">Batalkan</button>
+                                {% elif pesanan.status == "Pesanan Selesai" %}
+                                <!-- ZUFAR -->
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testimoniModal" style="width: 100%;">Buat Testimoni</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="batalkanModal{{ pesanan.id_pemesanan }}" tabindex="-1" aria-labelledby="batalkanModalLabel{{ pesanan.id_pemesanan }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="batalkanModalLabel{{ pesanan.id_pemesanan }}">Konfirmasi Pembatalan</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Apakah Anda yakin ingin membatalkan pesanan ini?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <form action="{% url 'service:cancel_booking' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="pesanan_id" value="{{ pesanan.id_pemesanan }}">
+                                            <button type="submit" class="btn btn-danger">Batalkan</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                Belum ada pemesanan jasa yang tersedia atau sesuai dengan filter yang Anda pilih.            </div>
+        {% endif %}
     </div>
 
-<style>
-    .table th, .table td {
-        vertical-align: middle;
-        text-align: center;
-    }
-    .btn {
-        font-size: 0.9rem;
-    }
-</style>
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .form-select, .input-group-text {
+            min-width: 160px;
+        }
+        .row .col-md-2 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+
 {% endblock %}
