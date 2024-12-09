@@ -38,7 +38,7 @@ DEBUG = not PRODUCTION
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "kscs8o0o0os8c8c4kcosco8g.34.126.149.123.sslip.io",
+    "basdat.sijarta-ltb.site",
 ]
 
 
