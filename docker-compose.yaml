@@ -12,8 +12,6 @@ services:
         "-c",
         "python manage.py apply_sql_migrations && gunicorn sijarta_ltb.wsgi:application --bind 0.0.0.0:8000",
       ]
-    ports:
-      - "80:8000"
 
     environment:
       - DB_HOST=${DB_HOST}
